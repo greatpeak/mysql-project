@@ -2,38 +2,53 @@ import mysql from "mysql2";
 
 const pool = mysql
   .createPool({
-    host: "127.0.01",
+    host: "127.0.0.1",
     user: "root",
-    password: "",
+    password: "MySecurePassword123!",
     database: "notes_app",
   })
   .promise();
 
 export async function getNotes() {
-  const [rows] = await pool.query("SELECT * FROM notes");
-  return rows;
+  try {
+    const [rows] = await pool.query("SELECT * FROM notes");
+    return rows;
+  } catch (error) {
+    console.error("Error fetching notes:", error);
+    throw error; 
+  }
 }
 
 export async function getNote(id) {
-  const [rows] = await pool.query(
-    `
-  SELECT * 
-  FROM notes
-  WHERE id = ?
-  `,
-    [id]
-  );
-  return rows[0];
+  try {
+    const [rows] = await pool.query(
+      `
+      SELECT * 
+      FROM notes
+      WHERE id = ?
+      `,
+      [id]
+    );
+    return rows[0];
+  } catch (error) {
+    console.error(`Error fetching note with ID ${id}:`, error);
+    throw error;
+  }
 }
 
 export async function createNote(title, contents) {
-  const [result] = await pool.query(
-    `
-  INSERT INTO notes (title, contents)
-  VALUES (?, ?)
-  `,
-    [title, contents]
-  );
-  const id = result.insertId;
-  return getNote(id);
+  try {
+    const [result] = await pool.query(
+      `
+      INSERT INTO notes (title, contents)
+      VALUES (?, ?)
+      `,
+      [title, contents]
+    );
+    const id = result.insertId;
+    return getNote(id);
+  } catch (error) {
+    console.error("Error creating note:", error);
+    throw error;
+  }
 }
